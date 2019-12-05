@@ -60,6 +60,7 @@ public class RNOnChartGestureListener implements OnChartGestureListener {
 
     @Override
     public void onChartSingleTapped(MotionEvent me) {
+        sendEvent("singleTapped", me);
     }
 
     @Override
@@ -113,6 +114,13 @@ public class RNOnChartGestureListener implements OnChartGestureListener {
             event.putDouble("bottom", leftBottom.y);
             event.putDouble("right", rightTop.x);
             event.putDouble("top", rightTop.y);
+
+            MPPointD rightValue = ((BarLineChartBase) chart).getValuesByTouchPoint(me.getX(), me.getY(), YAxis.AxisDependency.RIGHT);
+            MPPointD leftValue = ((BarLineChartBase) chart).getValuesByTouchPoint(me.getX(), me.getY(), YAxis.AxisDependency.LEFT);
+            event.putDouble("rightXValue", rightValue.x);
+            event.putDouble("rightYValue", rightValue.y);
+            event.putDouble("leftXValue", leftValue.x);
+            event.putDouble("leftYValue", leftValue.y);
 
             if (group != null && identifier != null) {
                 ChartGroupHolder.sync(group, identifier, chart.getScaleX(), chart.getScaleY(), (float) center.x, (float) center.y);

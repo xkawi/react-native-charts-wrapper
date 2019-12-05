@@ -464,6 +464,13 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         if self.onSelect == nil {
             return
         } else {
+            for gestureRecognizer in chartView.gestureRecognizers! {
+                if let tapGesture = gestureRecognizer as? UITapGestureRecognizer,
+                    tapGesture.numberOfTouches == 1,
+                    tapGesture.state == UITapGestureRecognizer.State.ended {
+                    sendEvent("singleTapped", tapGesture.location(in: chart))
+                }
+            }
             self.onSelect!(EntryToDictionaryUtils.entryToDictionary(entry))
             
         }
@@ -486,7 +493,7 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         sendEvent("chartTranslated")
     }
     
-    func sendEvent(_ action:String) {
+    func sendEvent(_ action:String, _ touchPoint: CGPoint? = nil) {
         var dict = [AnyHashable: Any]()
         
         dict["action"] = action
@@ -510,6 +517,16 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
                 dict["bottom"] = leftBottom.y
                 dict["right"] = rightTop.x
                 dict["top"] = rightTop.y
+                
+                if let tp = touchPoint {
+                   let rightValue = barLineChart.valueForTouchPoint(point: tp, axis: YAxis.AxisDependency.right)
+                   dict["rightXValue"] = rightValue.x
+                   dict["rightYValue"] = rightValue.y
+                   
+                   let leftValue = barLineChart.valueForTouchPoint(point: tp, axis: YAxis.AxisDependency.left)
+                   dict["leftXValue"] = leftValue.x
+                   dict["leftYValue"] = leftValue.y
+               }
                 
                 if self.group != nil && self.identifier != nil {
                     ChartGroupHolder.sync(group: self.group!, identifier: self.identifier!, scaleX: barLineChart.scaleX, scaleY: barLineChart.scaleY, centerX: center.x, centerY: center.y, performImmediately: true)
